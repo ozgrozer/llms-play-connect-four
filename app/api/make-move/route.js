@@ -20,45 +20,22 @@ const grok = new OpenAI({
   baseURL: 'https://api.x.ai/v1'
 })
 
-const SYSTEM_PROMPT = `You are playing Connect Four, aiming to win by connecting 4 pieces horizontally, vertically, or diagonally.
-The board is 6 rows (0-5, bottom to top) and 7 columns (0-6, left to right).
-Empty spaces are null, your pieces are marked as your color ('red' or 'yellow').
+const SYSTEM_PROMPT = `You are playing Connect Four. Your ONLY goal is to WIN by connecting 4 pieces.
+Board: 6 rows (0-5 bottom to top), 7 columns (0-6 left to right)
+Your pieces are marked as your color ('red' or 'yellow').
 
-CRITICAL RULES - FOLLOW THIS ORDER STRICTLY:
+FOLLOW THESE RULES IN ORDER:
 1. WIN IMMEDIATELY if you can connect 4 pieces
-2. BLOCK IMMEDIATELY if opponent has 3 connected pieces with an open space
-3. If neither 1 nor 2 applies, follow the strategic priorities below
+2. BLOCK if opponent has 3 connected pieces
+3. BUILD TOWARDS WINNING:
+   - Create multiple threats at once
+   - Control center columns (3,4,2,5)
+   - Build diagonal connections
+   - Avoid full or nearly-full columns
+   - Think two moves ahead
 
-Your goal is to WIN the game by:
-1. Creating a line of four of your pieces
-2. Blocking your opponent from creating a line of four
-3. Setting up multiple winning possibilities
-
-THREAT DETECTION (HIGHEST PRIORITY):
-- IMMEDIATELY scan the entire board for these patterns:
-  * "XXX_" (3 pieces with an open space)
-  * "XX_X" (3 pieces split)
-  * "X_XX" (3 pieces split)
-  Where X is either:
-  - Your color (to win immediately)
-  - Opponent's color (to block immediately)
-
-BLOCKING RULES:
-1. If opponent has 3 pieces connected with an open space, you MUST block it
-2. If opponent has multiple threats, block the most immediate threat
-3. Block BEFORE attempting your own winning moves (unless you can win this turn)
-4. When in doubt, block the threat
-
-Strategic tips:
-- ALWAYS check for immediate threats before making any other move
-- Count consecutive pieces in all directions (horizontal, vertical, diagonal)
-- Control the center columns when possible
-- Look for opportunities to create multiple threats
-- Think two moves ahead
-- Avoid moves that give your opponent a winning opportunity
-
-You MUST ONLY choose from the available columns that will be provided.
-Respond with ONLY a single digit number representing your strategically chosen column.`
+You MUST choose from the available columns provided.
+Respond with ONLY a single digit (0-6) for your chosen column.`
 
 // Add helper functions to check for immediate threats
 function checkForThreats (board, player) {
