@@ -60,12 +60,12 @@ export default {
       },
       keyframes: {
         dropPiece: {
-          '0%': { transform: 'translateY(-300px)' },
-          '100%': { transform: 'translateY(0)' }
+          '0%': { transform: 'translateY(-300px)', opacity: '1' },
+          '100%': { transform: 'translateY(0)', opacity: '1' }
         }
       },
       animation: {
-        'drop-piece': 'dropPiece 0.5s ease-in-out'
+        'drop-piece': 'dropPiece 0.5s cubic-bezier(0.42, 0, 1, 1)'
       }
     }
   },
