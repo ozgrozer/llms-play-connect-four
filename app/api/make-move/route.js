@@ -51,7 +51,14 @@ export async function POST (request) {
         ]
       })
 
-      const column = parseInt(response.content[0].text.trim())
+      // Extract just the number from Claude's response
+      const responseText = response.content[0].text.trim()
+      const columnMatch = responseText.match(/\d+/)
+      if (!columnMatch) {
+        throw new Error('Invalid column response from Claude')
+      }
+
+      const column = parseInt(columnMatch[0])
       if (isNaN(column) || column < 0 || column > 6 || !availableColumns.includes(column)) {
         throw new Error('Invalid column response from Claude')
       }
