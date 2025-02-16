@@ -8,28 +8,24 @@ const Scoreboard = ({
   totalGames
 }) => {
   return (
-    <div className='bg-white p-4 rounded-2xl shadow-lg mb-6 w-[250px]'>
-      <div className='flex flex-col gap-2'>
-        <h2 className='text-lg font-black text-center tracking-wider'>
+    <div className='bg-white p-2 rounded-xl shadow-lg mb-3 w-[200px]'>
+      <div className='flex flex-col gap-0.5'>
+        <h2 className='text-sm font-black text-center tracking-wider'>
           GAME {Math.min(gamesPlayed + 1, totalGames)} OF {totalGames}
         </h2>
 
-        <div className='grid grid-cols-2 gap-2 text-center'>
-          <span className='text-base font-black text-red-500'>
+        <div className='grid grid-cols-2 gap-0.5 text-center'>
+          <span className='text-xs font-black text-red-500'>
             {getPlayerDisplayName('red', redPlayer).toUpperCase()}
           </span>
-          <span className='text-base font-black text-yellow-400'>
+          <span className='text-xs font-black text-yellow-400'>
             {getPlayerDisplayName('yellow', yellowPlayer).toUpperCase()}
           </span>
         </div>
 
-        <div className='grid grid-cols-2 gap-2 text-center'>
-          <span className='text-2xl font-black'>
-            {scores.red}
-          </span>
-          <span className='text-2xl font-black'>
-            {scores.yellow}
-          </span>
+        <div className='grid grid-cols-2 gap-0.5 text-center'>
+          <span className='text-lg font-black'>{scores.red}</span>
+          <span className='text-lg font-black'>{scores.yellow}</span>
         </div>
       </div>
     </div>
