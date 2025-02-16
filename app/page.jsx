@@ -273,11 +273,15 @@ export default function ConnectFour () {
                 ? 'Human'
                 : redPlayer.startsWith('Claude')
                 ? 'Claude'
+                : redPlayer === AI_PLAYERS.LLAMA
+                ? 'Llama'
                 : 'OpenAI'
               : yellowPlayer === AI_PLAYERS.HUMAN
               ? 'Human'
               : yellowPlayer.startsWith('Claude')
               ? 'Claude'
+              : yellowPlayer === AI_PLAYERS.LLAMA
+              ? 'Llama'
               : 'OpenAI'}{' '}
             wins!
           </span>
@@ -295,11 +299,15 @@ export default function ConnectFour () {
                 ? 'Human'
                 : redPlayer.startsWith('Claude')
                 ? 'Claude'
+                : redPlayer === AI_PLAYERS.LLAMA
+                ? 'Llama'
                 : 'OpenAI'
               : yellowPlayer === AI_PLAYERS.HUMAN
               ? 'Human'
               : yellowPlayer.startsWith('Claude')
               ? 'Claude'
+              : yellowPlayer === AI_PLAYERS.LLAMA
+              ? 'Llama'
               : 'OpenAI'}
           </span>
           {isAIThinking && (
