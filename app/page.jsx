@@ -5,6 +5,7 @@ import { Loader2 } from 'lucide-react'
 import { useGameState } from '@/app/hooks/useGameState'
 import GameBoard from '@/app/components/GameBoard'
 import PlayerSelector from '@/app/components/PlayerSelector'
+import Scoreboard from '@/app/components/Scoreboard'
 import { getPlayerDisplayName } from '@/app/utils/gameLogic'
 
 const bungee = Bungee({
@@ -25,7 +26,12 @@ export default function ConnectFour () {
     lastMove,
     winningPositions,
     handleColumnClick,
-    resetGame
+    resetGame,
+    scores,
+    gamesPlayed,
+    TOTAL_GAMES,
+    isSeriesComplete,
+    startNewSeries
   } = useGameState()
 
   return (
@@ -36,7 +42,29 @@ export default function ConnectFour () {
         Connect <span className='text-blue-600'>Four</span>
       </h1>
 
-      {winner ? (
+      <Scoreboard
+        redPlayer={redPlayer}
+        yellowPlayer={yellowPlayer}
+        scores={scores}
+        gamesPlayed={gamesPlayed}
+        totalGames={TOTAL_GAMES}
+      />
+
+      {isSeriesComplete ? (
+        <div className='mb-6 text-2xl font-bold animate-bounce'>
+          <span
+            className={`${
+              scores.red > scores.yellow ? 'text-red-600' : 'text-yellow-500'
+            }`}
+          >
+            {getPlayerDisplayName(
+              scores.red > scores.yellow ? 'red' : 'yellow',
+              scores.red > scores.yellow ? redPlayer : yellowPlayer
+            )}{' '}
+            wins the series!
+          </span>
+        </div>
+      ) : winner ? (
         <div className='mb-6 text-2xl font-bold animate-bounce'>
           <span
             className={`${
@@ -83,13 +111,13 @@ export default function ConnectFour () {
       </div>
 
       <button
-        onClick={resetGame}
+        onClick={isSeriesComplete ? startNewSeries : resetGame}
         className='mt-4 px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg
                  font-semibold text-lg shadow-md hover:from-blue-600 hover:to-blue-700
                  transform hover:scale-105 transition-all duration-200
                  focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-50'
       >
-        New Game
+        {isSeriesComplete ? 'Start New Series' : 'New Game'}
       </button>
     </div>
   )

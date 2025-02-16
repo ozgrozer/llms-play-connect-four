@@ -17,6 +17,10 @@ export const useGameState = () => {
   const [isAIThinking, setIsAIThinking] = useState(false)
   const [lastMove, setLastMove] = useState(null)
   const [winningPositions, setWinningPositions] = useState([])
+  const [scores, setScores] = useState({ red: 0, yellow: 0 })
+  const [gamesPlayed, setGamesPlayed] = useState(0)
+  const [isSeriesComplete, setIsSeriesComplete] = useState(false)
+  const TOTAL_GAMES = 3
 
   const getCurrentAIPlayer = () => {
     if (currentPlayer === 'red' && redPlayer !== AI_PLAYERS.HUMAN) {
@@ -70,10 +74,19 @@ export const useGameState = () => {
     setLastMove(null)
     setWinningPositions([])
 
-    // Trigger AI move if red player is AI
-    if (redPlayer !== AI_PLAYERS.HUMAN) {
+    // Don't reset scores and games played here
+
+    // Only start new game if series is not complete
+    if (!isSeriesComplete && redPlayer !== AI_PLAYERS.HUMAN) {
       setTimeout(() => makeAIMove(), 500)
     }
+  }
+
+  const startNewSeries = () => {
+    setScores({ red: 0, yellow: 0 })
+    setGamesPlayed(0)
+    setIsSeriesComplete(false)
+    resetGame()
   }
 
   const handleColumnClick = async (colIndex, isAIMove = false) => {
@@ -108,10 +121,28 @@ export const useGameState = () => {
   }
 
   useEffect(() => {
+    if (winner) {
+      const newScores = { ...scores }
+      newScores[winner]++
+      setScores(newScores)
+
+      const newGamesPlayed = gamesPlayed + 1
+      setGamesPlayed(newGamesPlayed)
+
+      if (newGamesPlayed < TOTAL_GAMES) {
+        // Start next game after a delay
+        setTimeout(() => resetGame(), 2000)
+      } else {
+        setIsSeriesComplete(true)
+      }
+    }
+  }, [winner])
+
+  useEffect(() => {
     let timeoutId
     const aiPlayer = getCurrentAIPlayer()
 
-    if (aiPlayer && !winner && !isAIThinking) {
+    if (aiPlayer && !winner && !isAIThinking && !isSeriesComplete) {
       timeoutId = setTimeout(() => makeAIMove(), 1000)
     }
 
@@ -134,6 +165,11 @@ export const useGameState = () => {
     lastMove,
     winningPositions,
     handleColumnClick,
-    resetGame
+    resetGame,
+    scores,
+    gamesPlayed,
+    TOTAL_GAMES,
+    isSeriesComplete,
+    startNewSeries
   }
 }
