@@ -1,7 +1,8 @@
 'use client'
 
-import { useState } from 'react'
 import { Bungee } from 'next/font/google'
+import { useState, useEffect } from 'react'
+import { Loader2 } from 'lucide-react'
 import {
   Select,
   SelectContent,
@@ -10,6 +11,10 @@ import {
   SelectValue
 } from '@/components/ui/select'
 
+// Add type definition for fetch
+/** @type {typeof globalThis.fetch} */
+const fetch = globalThis.fetch
+
 const bungee = Bungee({
   subsets: ['latin'],
   weight: ['400']
@@ -17,7 +22,7 @@ const bungee = Bungee({
 
 const AI_PLAYERS = {
   CLAUDE: 'Claude 3.5 Sonnet',
-  GPT4: 'GPT-4',
+  GPT4: 'OpenAI GPT-4o',
   HUMAN: 'Human'
 }
 
@@ -31,6 +36,8 @@ export default function ConnectFour () {
   const [winner, setWinner] = useState(null)
   const [redPlayer, setRedPlayer] = useState(AI_PLAYERS.HUMAN)
   const [yellowPlayer, setYellowPlayer] = useState(AI_PLAYERS.HUMAN)
+  const [isAIThinking, setIsAIThinking] = useState(false)
+  const [lastMove, setLastMove] = useState(null)
 
   const checkWin = (board, row, col, player) => {
     // Check horizontal
@@ -96,22 +103,95 @@ export default function ConnectFour () {
     )
     setCurrentPlayer('red')
     setWinner(null)
+    setIsAIThinking(false)
+    setLastMove(null)
+
+    // Trigger AI move if red player is AI
+    if (redPlayer !== AI_PLAYERS.HUMAN) {
+      setTimeout(() => makeAIMove(), 500)
+    }
   }
 
-  const handleColumnClick = colIndex => {
-    if (winner) return
+  const getCurrentAIPlayer = () => {
+    if (currentPlayer === 'red' && redPlayer !== AI_PLAYERS.HUMAN) {
+      return redPlayer
+    }
+    if (currentPlayer === 'yellow' && yellowPlayer !== AI_PLAYERS.HUMAN) {
+      return yellowPlayer
+    }
+    return null
+  }
+
+  const makeAIMove = async () => {
+    const aiPlayer = getCurrentAIPlayer()
+    if (!aiPlayer || winner) {
+      setIsAIThinking(false)
+      return
+    }
+
+    setIsAIThinking(true)
+    try {
+      const response = await fetch('/api/make-move', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          board,
+          currentPlayer,
+          model: aiPlayer
+        })
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to get AI move')
+      }
+
+      handleColumnClick(data.column, true)
+      setIsAIThinking(false)
+    } catch (error) {
+      console.error('Error getting AI move:', error)
+      setIsAIThinking(false)
+      // Optionally show error to user here
+    }
+  }
+
+  useEffect(() => {
+    const aiPlayer = getCurrentAIPlayer()
+    if (aiPlayer && !winner && !isAIThinking) {
+      setTimeout(() => makeAIMove(), 500)
+    }
+  }, [currentPlayer, winner, board, isAIThinking])
+
+  const handleColumnClick = (colIndex, isAIMove = false) => {
+    if (winner || isAIThinking) return
+
+    const currentAIPlayer = getCurrentAIPlayer()
+    if (currentAIPlayer && !isAIMove) return // Only prevent human moves during AI turns
+
+    // Check if column is full
+    if (board[0][colIndex] !== null) {
+      console.error('Column is full, cannot make move')
+      setIsAIThinking(false)
+      return
+    }
 
     const newBoard = [...board]
     for (let row = 5; row >= 0; row--) {
       if (!newBoard[row][colIndex]) {
         newBoard[row][colIndex] = currentPlayer
         setBoard(newBoard)
+        setLastMove({ row, col: colIndex })
 
         if (checkWin(newBoard, row, colIndex, currentPlayer)) {
           setWinner(currentPlayer)
+          setIsAIThinking(false) // Ensure AI thinking is reset on win
           return
         }
 
+        // Only switch players if no winner
         setCurrentPlayer(currentPlayer === 'red' ? 'yellow' : 'red')
         break
       }
@@ -133,45 +213,70 @@ export default function ConnectFour () {
               winner === 'red' ? 'text-red-600' : 'text-yellow-500'
             }`}
           >
-            {winner.charAt(0).toUpperCase() + winner.slice(1)} wins!
+            {winner === 'red'
+              ? (redPlayer === AI_PLAYERS.HUMAN
+                ? 'Human'
+                : redPlayer.startsWith('Claude')
+                  ? 'Claude'
+                  : 'OpenAI')
+              : (yellowPlayer === AI_PLAYERS.HUMAN
+                ? 'Human'
+                : yellowPlayer.startsWith('Claude')
+                  ? 'Claude'
+                  : 'OpenAI')} wins!
           </span>
         </div>
       ) : (
-        <div className='mb-6 text-2xl font-semibold text-gray-700'>
+        <div className='mb-6 text-2xl font-semibold text-gray-700 flex items-center gap-3'>
           Current Player:{' '}
           <span
             className={`${
               currentPlayer === 'red' ? 'text-red-600' : 'text-yellow-500'
             } inline-block transition-transform duration-300 hover:scale-110`}
           >
-            {currentPlayer.charAt(0).toUpperCase() + currentPlayer.slice(1)}
+            {currentPlayer === 'red'
+              ? redPlayer === AI_PLAYERS.HUMAN
+                ? 'Human'
+                : redPlayer.startsWith('Claude')
+                  ? 'Claude'
+                  : 'OpenAI'
+              : yellowPlayer === AI_PLAYERS.HUMAN
+              ? 'Human'
+              : yellowPlayer.startsWith('Claude')
+                ? 'Claude'
+                : 'OpenAI'}
           </span>
+          {isAIThinking && (
+            <Loader2 className='w-6 h-6 animate-spin text-black stroke-[2px]' />
+          )}
         </div>
       )}
 
       <div className='bg-blue-600 p-6 rounded-xl shadow-[0_0_30px_rgba(59,130,246,0.5)]'>
-        <div className='grid grid-cols-7 gap-3 bg-blue-700 p-4 rounded-lg'>
+        <div className='grid grid-cols-7 gap-3 bg-blue-700 p-4 rounded-lg relative overflow-hidden'>
           {board.map((row, rowIndex) =>
             row.map((cell, colIndex) => (
               <div
                 key={`${rowIndex}-${colIndex}`}
-                className='relative w-16 h-16 bg-slate-800 rounded-full flex items-center justify-center cursor-pointer transform hover:scale-105 transition-transform duration-150 shadow-inner'
+                className='w-12 h-12 relative'
                 onClick={() => handleColumnClick(colIndex)}
               >
+                {/* Permanent hole background */}
+                <div className='absolute inset-0 rounded-full bg-gray-700' />
+
+                {/* Animated game piece */}
                 {cell && (
                   <div
-                    className={`
-                      absolute w-14 h-14 rounded-full
-                      ${cell === 'red' ? 'bg-red-500' : 'bg-yellow-400'}
-                      transition-all duration-300 ease-out
-                      shadow-lg
-                      ${
-                        cell === 'red'
-                          ? 'shadow-red-700/50'
-                          : 'shadow-yellow-600/50'
-                      }
-                      animate-drop-piece
-                    `}
+                    className={`absolute inset-0 rounded-full ${
+                      cell === 'red' ? 'bg-red-600' : 'bg-yellow-500'
+                    } ${
+                      lastMove?.row === rowIndex && lastMove?.col === colIndex
+                        ? 'animate-drop-piece'
+                        : ''
+                    }`}
+                    style={{
+                      zIndex: lastMove?.row === rowIndex && lastMove?.col === colIndex ? 10 : 1
+                    }}
                   />
                 )}
               </div>
@@ -192,7 +297,7 @@ export default function ConnectFour () {
               <SelectItem value={AI_PLAYERS.CLAUDE}>
                 Claude 3.5 Sonnet
               </SelectItem>
-              <SelectItem value={AI_PLAYERS.GPT4}>GPT-4</SelectItem>
+              <SelectItem value={AI_PLAYERS.GPT4}>OpenAI GPT-4o</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -210,7 +315,7 @@ export default function ConnectFour () {
               <SelectItem value={AI_PLAYERS.CLAUDE}>
                 Claude 3.5 Sonnet
               </SelectItem>
-              <SelectItem value={AI_PLAYERS.GPT4}>GPT-4</SelectItem>
+              <SelectItem value={AI_PLAYERS.GPT4}>OpenAI GPT-4o</SelectItem>
             </SelectContent>
           </Select>
         </div>
