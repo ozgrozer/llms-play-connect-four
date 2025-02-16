@@ -2,11 +2,24 @@
 
 import { useState } from 'react'
 import { Bungee } from 'next/font/google'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '@/components/ui/select'
 
 const bungee = Bungee({
   subsets: ['latin'],
   weight: ['400']
 })
+
+const AI_PLAYERS = {
+  CLAUDE: 'Claude 3.5 Sonnet',
+  GPT4: 'GPT-4',
+  HUMAN: 'Human'
+}
 
 export default function ConnectFour () {
   const [board, setBoard] = useState(
@@ -16,6 +29,8 @@ export default function ConnectFour () {
   )
   const [currentPlayer, setCurrentPlayer] = useState('red')
   const [winner, setWinner] = useState(null)
+  const [redPlayer, setRedPlayer] = useState(AI_PLAYERS.HUMAN)
+  const [yellowPlayer, setYellowPlayer] = useState(AI_PLAYERS.HUMAN)
 
   const checkWin = (board, row, col, player) => {
     // Check horizontal
@@ -105,7 +120,7 @@ export default function ConnectFour () {
 
   return (
     <div
-      className={`flex flex-col items-center justify-center min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 ${bungee.className}`}
+      className={`flex flex-col items-center justify-center min-h-screen bg-gray-100 p-8 ${bungee.className}`}
     >
       <h1 className='text-5xl font-bold mb-8 text-gray-800 tracking-wide'>
         Connect <span className='text-blue-600'>Four</span>
@@ -165,9 +180,45 @@ export default function ConnectFour () {
         </div>
       </div>
 
+      <div className='flex gap-4 mt-8 mb-6'>
+        <div className='flex flex-col items-start'>
+          <label className='text-red-600 font-semibold mb-2'>Red Player</label>
+          <Select value={redPlayer} onValueChange={setRedPlayer}>
+            <SelectTrigger className='w-[220px]'>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value={AI_PLAYERS.HUMAN}>Human</SelectItem>
+              <SelectItem value={AI_PLAYERS.CLAUDE}>
+                Claude 3.5 Sonnet
+              </SelectItem>
+              <SelectItem value={AI_PLAYERS.GPT4}>GPT-4</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className='flex flex-col items-start'>
+          <label className='text-yellow-500 font-semibold mb-2'>
+            Yellow Player
+          </label>
+          <Select value={yellowPlayer} onValueChange={setYellowPlayer}>
+            <SelectTrigger className='w-[220px]'>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value={AI_PLAYERS.HUMAN}>Human</SelectItem>
+              <SelectItem value={AI_PLAYERS.CLAUDE}>
+                Claude 3.5 Sonnet
+              </SelectItem>
+              <SelectItem value={AI_PLAYERS.GPT4}>GPT-4</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+
       <button
         onClick={resetGame}
-        className='mt-8 px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg
+        className='mt-4 px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg
                  font-semibold text-lg shadow-md hover:from-blue-600 hover:to-blue-700
                  transform hover:scale-105 transition-all duration-200
                  focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-50'
