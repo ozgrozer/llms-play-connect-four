@@ -1,0 +1,4 @@
+this is a connect four game built with next.js, tailwind css, and shadcn/ui
+use single quotes instead of double quotes
+use pnpm instead of npm
+for installing shadcn components use a command like this: "pnpm dlx shadcn@latest add select"
