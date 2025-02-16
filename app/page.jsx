@@ -237,6 +237,9 @@ export default function ConnectFour () {
     setBoard(newBoard)
     setLastMove({ row: rowIndex, col: colIndex })
 
+    // Wait for the dropping animation to complete before checking winner
+    await new Promise(resolve => setTimeout(resolve, 500))
+
     // Check for winner
     const winResult = checkWin(newBoard, rowIndex, colIndex, currentPlayer)
     if (winResult.hasWon) {
