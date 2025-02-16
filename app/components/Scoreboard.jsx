@@ -8,30 +8,29 @@ const Scoreboard = ({
   totalGames
 }) => {
   return (
-    <div className='bg-white p-4 rounded-lg shadow-md mb-6 w-[300px]'>
-      <h2 className='text-xl font-bold mb-4 text-center'>Series Score</h2>
-      <div className='flex justify-between items-center mb-2'>
-        <div className='flex items-center gap-2'>
-          <div className='w-4 h-4 rounded-full bg-red-600'></div>
-          <span className='font-semibold'>
-            {getPlayerDisplayName('red', redPlayer)}
+    <div className='bg-white p-4 rounded-2xl shadow-lg mb-6 w-[250px]'>
+      <div className='flex flex-col gap-2'>
+        <h2 className='text-lg font-black text-center tracking-wider'>
+          GAME {gamesPlayed + 1} OF {totalGames}
+        </h2>
+
+        <div className='grid grid-cols-2 gap-2 text-center'>
+          <span className='text-base font-black text-red-500'>
+            {getPlayerDisplayName('red', redPlayer).toUpperCase()}
+          </span>
+          <span className='text-base font-black text-yellow-400'>
+            {getPlayerDisplayName('yellow', yellowPlayer).toUpperCase()}
           </span>
         </div>
-        <span className='text-2xl font-bold text-red-600'>{scores.red}</span>
-      </div>
-      <div className='flex justify-between items-center'>
-        <div className='flex items-center gap-2'>
-          <div className='w-4 h-4 rounded-full bg-yellow-500'></div>
-          <span className='font-semibold'>
-            {getPlayerDisplayName('yellow', yellowPlayer)}
+
+        <div className='grid grid-cols-2 gap-2 text-center'>
+          <span className='text-2xl font-black'>
+            {scores.red}
+          </span>
+          <span className='text-2xl font-black'>
+            {scores.yellow}
           </span>
         </div>
-        <span className='text-2xl font-bold text-yellow-500'>
-          {scores.yellow}
-        </span>
-      </div>
-      <div className='mt-4 text-center text-sm text-gray-600'>
-        Game {gamesPlayed + 1} of {totalGames}
       </div>
     </div>
   )

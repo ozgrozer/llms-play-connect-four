@@ -39,7 +39,8 @@ export default function ConnectFour () {
       className={`flex flex-col items-center justify-center min-h-screen bg-gray-100 p-8 ${bungee.className}`}
     >
       <h1 className='text-5xl font-bold mb-8 text-gray-800 tracking-wide'>
-        Connect <span className='text-blue-600'>Four</span>
+        <span className='text-gray-700'>Connect</span>{' '}
+        <span className='text-blue-600'>Four</span>
       </h1>
 
       <Scoreboard
@@ -71,7 +72,11 @@ export default function ConnectFour () {
               winner === 'red' ? 'text-red-600' : 'text-yellow-500'
             }`}
           >
-            {getPlayerDisplayName(winner, winner === 'red' ? redPlayer : yellowPlayer)} wins!
+            {getPlayerDisplayName(
+              winner,
+              winner === 'red' ? redPlayer : yellowPlayer
+            )}{' '}
+            wins!
           </span>
         </div>
       ) : (
@@ -82,7 +87,10 @@ export default function ConnectFour () {
               currentPlayer === 'red' ? 'text-red-600' : 'text-yellow-500'
             } inline-block transition-transform duration-300 hover:scale-110`}
           >
-            {getPlayerDisplayName(currentPlayer, currentPlayer === 'red' ? redPlayer : yellowPlayer)}
+            {getPlayerDisplayName(
+              currentPlayer,
+              currentPlayer === 'red' ? redPlayer : yellowPlayer
+            )}
           </span>
           {isAIThinking && (
             <Loader2 className='w-6 h-6 animate-spin text-black stroke-[2px]' />
