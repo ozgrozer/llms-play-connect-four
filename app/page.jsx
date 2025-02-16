@@ -186,7 +186,7 @@ export default function ConnectFour () {
       handleColumnClick(data.column, true)
       setIsAIThinking(false)
     } catch (error) {
-      console.error('Error getting AI move:', error)
+      console.log('Error getting AI move:', error)
       setIsAIThinking(false)
       // Optionally show error to user here
     }
@@ -207,7 +207,7 @@ export default function ConnectFour () {
 
     // Check if column is full
     if (board[0][colIndex] !== null) {
-      console.error('Column is full, cannot make move')
+      console.log('Column is full, cannot make move')
       setIsAIThinking(false)
       return
     }
