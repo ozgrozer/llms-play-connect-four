@@ -38,6 +38,7 @@ export default function ConnectFour () {
   const [yellowPlayer, setYellowPlayer] = useState(AI_PLAYERS.HUMAN)
   const [isAIThinking, setIsAIThinking] = useState(false)
   const [lastMove, setLastMove] = useState(null)
+  const [winningPositions, setWinningPositions] = useState([])
 
   const checkWin = (board, row, col, player) => {
     // Check horizontal
@@ -48,7 +49,15 @@ export default function ConnectFour () {
         board[row][c + 2] === player &&
         board[row][c + 3] === player
       ) {
-        return true
+        return {
+          hasWon: true,
+          positions: [
+            [row, c],
+            [row, c + 1],
+            [row, c + 2],
+            [row, c + 3]
+          ]
+        }
       }
     }
 
@@ -60,7 +69,15 @@ export default function ConnectFour () {
         board[r + 2][col] === player &&
         board[r + 3][col] === player
       ) {
-        return true
+        return {
+          hasWon: true,
+          positions: [
+            [r, col],
+            [r + 1, col],
+            [r + 2, col],
+            [r + 3, col]
+          ]
+        }
       }
     }
 
@@ -73,7 +90,15 @@ export default function ConnectFour () {
           board[r - 2][c + 2] === player &&
           board[r - 3][c + 3] === player
         ) {
-          return true
+          return {
+            hasWon: true,
+            positions: [
+              [r, c],
+              [r - 1, c + 1],
+              [r - 2, c + 2],
+              [r - 3, c + 3]
+            ]
+          }
         }
       }
     }
@@ -87,12 +112,20 @@ export default function ConnectFour () {
           board[r + 2][c + 2] === player &&
           board[r + 3][c + 3] === player
         ) {
-          return true
+          return {
+            hasWon: true,
+            positions: [
+              [r, c],
+              [r + 1, c + 1],
+              [r + 2, c + 2],
+              [r + 3, c + 3]
+            ]
+          }
         }
       }
     }
 
-    return false
+    return { hasWon: false, positions: [] }
   }
 
   const resetGame = () => {
@@ -105,6 +138,7 @@ export default function ConnectFour () {
     setWinner(null)
     setIsAIThinking(false)
     setLastMove(null)
+    setWinningPositions([])
 
     // Trigger AI move if red player is AI
     if (redPlayer !== AI_PLAYERS.HUMAN) {
@@ -185,8 +219,10 @@ export default function ConnectFour () {
         setBoard(newBoard)
         setLastMove({ row, col: colIndex })
 
-        if (checkWin(newBoard, row, colIndex, currentPlayer)) {
+        const winResult = checkWin(newBoard, row, colIndex, currentPlayer)
+        if (winResult.hasWon) {
           setWinner(currentPlayer)
+          setWinningPositions(winResult.positions)
           setIsAIThinking(false) // Ensure AI thinking is reset on win
           return
         }
@@ -214,16 +250,17 @@ export default function ConnectFour () {
             }`}
           >
             {winner === 'red'
-              ? (redPlayer === AI_PLAYERS.HUMAN
+              ? redPlayer === AI_PLAYERS.HUMAN
                 ? 'Human'
                 : redPlayer.startsWith('Claude')
-                  ? 'Claude'
-                  : 'OpenAI')
-              : (yellowPlayer === AI_PLAYERS.HUMAN
-                ? 'Human'
-                : yellowPlayer.startsWith('Claude')
-                  ? 'Claude'
-                  : 'OpenAI')} wins!
+                ? 'Claude'
+                : 'OpenAI'
+              : yellowPlayer === AI_PLAYERS.HUMAN
+              ? 'Human'
+              : yellowPlayer.startsWith('Claude')
+              ? 'Claude'
+              : 'OpenAI'}{' '}
+            wins!
           </span>
         </div>
       ) : (
@@ -238,13 +275,13 @@ export default function ConnectFour () {
               ? redPlayer === AI_PLAYERS.HUMAN
                 ? 'Human'
                 : redPlayer.startsWith('Claude')
-                  ? 'Claude'
-                  : 'OpenAI'
+                ? 'Claude'
+                : 'OpenAI'
               : yellowPlayer === AI_PLAYERS.HUMAN
               ? 'Human'
               : yellowPlayer.startsWith('Claude')
-                ? 'Claude'
-                : 'OpenAI'}
+              ? 'Claude'
+              : 'OpenAI'}
           </span>
           {isAIThinking && (
             <Loader2 className='w-6 h-6 animate-spin text-black stroke-[2px]' />
@@ -273,9 +310,18 @@ export default function ConnectFour () {
                       lastMove?.row === rowIndex && lastMove?.col === colIndex
                         ? 'animate-drop-piece'
                         : ''
+                    } ${
+                      winningPositions.some(
+                        ([row, col]) => row === rowIndex && col === colIndex
+                      )
+                        ? 'ring-4 ring-white ring-opacity-75 animate-pulse'
+                        : ''
                     }`}
                     style={{
-                      zIndex: lastMove?.row === rowIndex && lastMove?.col === colIndex ? 10 : 1
+                      zIndex:
+                        lastMove?.row === rowIndex && lastMove?.col === colIndex
+                          ? 10
+                          : 1
                     }}
                   />
                 )}
