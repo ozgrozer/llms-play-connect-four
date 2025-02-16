@@ -262,7 +262,7 @@ export default function ConnectFour () {
                 onClick={() => handleColumnClick(colIndex)}
               >
                 {/* Permanent hole background */}
-                <div className='absolute inset-0 rounded-full bg-gray-700' />
+                <div className='absolute inset-0 rounded-full bg-gray-700 shadow-[inset_0_3px_4px_rgba(0,0,0,0.3)]' />
 
                 {/* Animated game piece */}
                 {cell && (
