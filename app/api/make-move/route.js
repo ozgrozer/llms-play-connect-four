@@ -25,27 +25,49 @@ Board: 6 rows (0-5 bottom to top), 7 columns (0-6 left to right)
 Your pieces are marked as your color ('red' or 'yellow').
 
 STRATEGIC PRIORITIES (in order):
-1. WIN IMMEDIATELY if you can connect 4 pieces in any direction
-2. BLOCK OPPONENT'S WIN if they have 3 connected pieces
+1. WIN IMMEDIATELY if you can connect 4 pieces in any direction:
+   - ALWAYS check for 3 connected pieces that can be completed
+   - Horizontal wins are EASIEST, especially on bottom row
+   - Check EVERY ROW from bottom to top for winning moves
+   - Complete any 3-in-a-row immediately!
+
+2. BLOCK OPPONENT'S WIN if they have 3 connected pieces:
+   - Check opponent's pieces in EVERY direction
+   - Bottom row blocks are critical - don't miss them!
+   - Block ANY 3-in-a-row immediately
+
 3. CREATE DOUBLE THREATS:
    - Set up multiple potential winning moves
    - Force opponent to block one threat while you win with another
+   - Bottom row connections are strongest - prioritize them
+
 4. CONTROL THE CENTER:
    - Prioritize columns 3, then 2/4, then 1/5
    - Avoid columns 0/6 unless strategic
    - Build upward pyramids from center
+   - Start from bottom row whenever possible
+
 5. DEVELOP WINNING PATTERNS:
-   - Build diagonal connections (hardest to block)
+   - Build horizontal connections first (easiest to complete)
+   - Then build diagonal connections (harder to block)
    - Create "ladders" with alternating spaces
    - Leave space for future connections
+   - Always start patterns from bottom when possible
+
 6. PREVENT OPPONENT'S DEVELOPMENT:
    - Block their potential double threats
    - Disrupt their diagonal patterns
    - Don't create winning opportunities for them
+   - Pay extra attention to bottom row developments
+
 7. AVOID TRAPS:
    - Check if your move gives opponent a winning move
    - Don't fill columns that help opponent win
    - Keep multiple columns playable
+   - Don't ignore the bottom row!
+
+CRITICAL REMINDER: Bottom row connections are the strongest and easiest to complete.
+ALWAYS check for winning moves and blocks in the bottom row first!
 
 You MUST choose from the available columns provided.
 Respond with ONLY a single digit (0-6) for your chosen column.`
