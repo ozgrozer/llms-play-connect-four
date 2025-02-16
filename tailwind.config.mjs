@@ -60,12 +60,16 @@ export default {
       },
       keyframes: {
         dropPiece: {
-          '0%': { transform: 'translateY(-300px)', opacity: '1' },
-          '100%': { transform: 'translateY(0)', opacity: '1' }
+          '0%': { transform: 'translateY(-300px)' },
+          '70%': { transform: 'translateY(10px)' },
+          '85%': { transform: 'translateY(-8px)' },
+          '92%': { transform: 'translateY(5px)' },
+          '96%': { transform: 'translateY(-3px)' },
+          '100%': { transform: 'translateY(0)' }
         }
       },
       animation: {
-        'drop-piece': 'dropPiece 0.5s cubic-bezier(0.42, 0, 1, 1)'
+        'drop-piece': 'dropPiece 0.6s ease-in'
       }
     }
   },
