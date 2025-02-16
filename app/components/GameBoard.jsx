@@ -1,6 +1,11 @@
 'use client'
 
-const GameBoard = ({ board, handleColumnClick, lastMove, winningPositions }) => {
+const GameBoard = ({
+  board,
+  handleColumnClick,
+  lastMove,
+  winningPositions
+}) => {
   return (
     <div className='bg-blue-600 p-6 rounded-xl shadow-[0_0_30px_rgba(59,130,246,0.5)]'>
       <div className='grid grid-cols-7 gap-3 bg-blue-700 p-4 rounded-lg relative overflow-hidden'>

@@ -31,7 +31,8 @@ export default function ConnectFour () {
     gamesPlayed,
     TOTAL_GAMES,
     isSeriesComplete,
-    startNewSeries
+    startNewSeries,
+    countdown
   } = useGameState()
 
   return (
@@ -65,7 +66,7 @@ export default function ConnectFour () {
             wins the series!
           </span>
         </div>
-      ) : winner ? (
+      ) : winner && countdown === null ? (
         <div className='mb-6 text-2xl font-bold animate-bounce'>
           <span
             className={`${
@@ -78,6 +79,10 @@ export default function ConnectFour () {
             )}{' '}
             wins!
           </span>
+        </div>
+      ) : countdown !== null ? (
+        <div className='mb-6 text-2xl font-semibold text-gray-700'>
+          A new game is starting in {countdown} seconds...
         </div>
       ) : (
         <div className='mb-6 text-2xl font-semibold text-gray-700 flex items-center gap-3'>

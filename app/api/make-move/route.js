@@ -146,12 +146,20 @@ function checkForWinningMove (board, player) {
 
   // Helper to check if a position is valid and empty
   const isValidEmpty = (row, col) => {
-    return row >= 0 && row < 6 && col >= 0 && col < 7 && board[row][col] === null
+    return (
+      row >= 0 && row < 6 && col >= 0 && col < 7 && board[row][col] === null
+    )
   }
 
   // Helper to check if a position has a specific player's piece
   const isPlayer = (row, col, checkPlayer) => {
-    return row >= 0 && row < 6 && col >= 0 && col < 7 && board[row][col] === checkPlayer
+    return (
+      row >= 0 &&
+      row < 6 &&
+      col >= 0 &&
+      col < 7 &&
+      board[row][col] === checkPlayer
+    )
   }
 
   // Check horizontal winning moves
@@ -256,7 +264,9 @@ export async function POST (request) {
 
     // First, check for winning moves
     const winningMoves = checkForWinningMove(board, currentPlayer)
-    const validWinningMoves = winningMoves.filter(col => availableColumns.includes(col))
+    const validWinningMoves = winningMoves.filter(col =>
+      availableColumns.includes(col)
+    )
     if (validWinningMoves.length > 0) {
       console.log('Found winning move at column:', validWinningMoves[0])
       return NextResponse.json({ column: validWinningMoves[0] })
@@ -270,7 +280,10 @@ export async function POST (request) {
         .sort((a, b) => a.priority - b.priority)
 
       if (validThreats.length > 0) {
-        console.log('Found immediate threat, blocking at column:', validThreats[0].col)
+        console.log(
+          'Found immediate threat, blocking at column:',
+          validThreats[0].col
+        )
         return NextResponse.json({ column: validThreats[0].col })
       }
     }

@@ -2,7 +2,12 @@
 
 import { useState, useEffect } from 'react'
 import { AI_PLAYERS } from '@/app/constants/game'
-import { checkWin, createEmptyBoard, findLowestEmptyRow, isColumnFull } from '@/app/utils/gameLogic'
+import {
+  checkWin,
+  createEmptyBoard,
+  findLowestEmptyRow,
+  isColumnFull
+} from '@/app/utils/gameLogic'
 
 // Add type definition for fetch
 /** @type {typeof globalThis.fetch} */
@@ -20,6 +25,7 @@ export const useGameState = () => {
   const [scores, setScores] = useState({ red: 0, yellow: 0 })
   const [gamesPlayed, setGamesPlayed] = useState(0)
   const [isSeriesComplete, setIsSeriesComplete] = useState(false)
+  const [countdown, setCountdown] = useState(null)
   const TOTAL_GAMES = 3
 
   const getCurrentAIPlayer = () => {
@@ -73,11 +79,10 @@ export const useGameState = () => {
     setIsAIThinking(false)
     setLastMove(null)
     setWinningPositions([])
+    setCountdown(null)
 
-    // Don't reset scores and games played here
-
-    // Only start new game if series is not complete
-    if (!isSeriesComplete && redPlayer !== AI_PLAYERS.HUMAN) {
+    // Trigger AI move if red player is AI
+    if (redPlayer !== AI_PLAYERS.HUMAN) {
       setTimeout(() => makeAIMove(), 500)
     }
   }
@@ -130,8 +135,18 @@ export const useGameState = () => {
       setGamesPlayed(newGamesPlayed)
 
       if (newGamesPlayed < TOTAL_GAMES) {
-        // Start next game after a delay
-        setTimeout(() => resetGame(), 2000)
+        // Start countdown for next game
+        setCountdown(3)
+        const timer = setInterval(() => {
+          setCountdown(prev => {
+            if (prev <= 1) {
+              clearInterval(timer)
+              resetGame()
+              return null
+            }
+            return prev - 1
+          })
+        }, 1000)
       } else {
         setIsSeriesComplete(true)
       }
@@ -170,6 +185,7 @@ export const useGameState = () => {
     gamesPlayed,
     TOTAL_GAMES,
     isSeriesComplete,
-    startNewSeries
+    startNewSeries,
+    countdown
   }
 }
