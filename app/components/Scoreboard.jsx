@@ -11,7 +11,7 @@ const Scoreboard = ({
     <div className='bg-white p-4 rounded-2xl shadow-lg mb-6 w-[250px]'>
       <div className='flex flex-col gap-2'>
         <h2 className='text-lg font-black text-center tracking-wider'>
-          GAME {gamesPlayed + 1} OF {totalGames}
+          GAME {Math.min(gamesPlayed + 1, totalGames)} OF {totalGames}
         </h2>
 
         <div className='grid grid-cols-2 gap-2 text-center'>
