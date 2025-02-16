@@ -10,20 +10,34 @@ const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY
 })
 
-const SYSTEM_PROMPT = `You are playing Connect Four. The board is 6 rows (0-5) and 7 columns (0-6).
+const SYSTEM_PROMPT = `You are playing Connect Four, aiming to win by connecting 4 pieces horizontally, vertically, or diagonally.
+The board is 6 rows (0-5, bottom to top) and 7 columns (0-6, left to right).
 Empty spaces are null, your pieces are marked as your color ('red' or 'yellow').
-Analyze the board and choose the best column (0-6) to place your piece.
-IMPORTANT: You must check if the column has any empty spaces (null) before choosing it.
-If a column is full (no null spaces), you cannot choose that column.
-Respond with ONLY a number 0-6 representing your chosen column.
-Make sure your chosen column has at least one empty (null) space.`
+
+Your goal is to WIN the game by:
+1. Creating a line of four of your pieces
+2. Blocking your opponent from creating a line of four
+3. Setting up multiple winning possibilities
+
+Strategic tips:
+- Control the center columns when possible
+- Look for opportunities to create multiple threats
+- Block your opponent's potential winning moves
+- Avoid moves that help your opponent win
+- Think two moves ahead
+
+You MUST ONLY choose from the available columns that will be provided.
+Respond with ONLY a single digit number representing your strategically chosen column.`
 
 export async function POST (request) {
+  let availableColumns = []
+  const MAX_RETRIES = 3 // Maximum number of retries for invalid responses
+
   try {
     const { board, currentPlayer, model } = await request.json()
 
     // Check which columns are available
-    const availableColumns = []
+    availableColumns = []
     for (let col = 0; col < 7; col++) {
       if (board[0][col] === null) { // If top row is null, column has space
         availableColumns.push(col)
@@ -34,64 +48,136 @@ export async function POST (request) {
       return NextResponse.json({ error: 'No valid moves available' }, { status: 400 })
     }
 
-    const boardStr = JSON.stringify(board)
-    const movePrompt = `Current board state:\n${boardStr}\nYou are playing as ${currentPlayer}. Available columns are: ${availableColumns.join(', ')}. Which column do you choose (must be one of the available columns)?`
+    // Create a visual representation of the board
+    let visualBoard = '\n'
+    for (let row = 0; row < 6; row++) {
+      let rowStr = '|'
+      for (let col = 0; col < 7; col++) {
+        if (board[row][col] === null) rowStr += ' ·'
+        else if (board[row][col] === 'red') rowStr += ' R'
+        else rowStr += ' Y'
+      }
+      visualBoard += rowStr + ' |\n'
+    }
+    visualBoard += '+--------------+\n |0 1 2 3 4 5 6|\n'
+
+    const getPrompt = (retryCount) => `${visualBoard}
+You are playing as ${currentPlayer.toUpperCase()}.
+Available columns: ${availableColumns.join(', ')}
+${retryCount > 0 ? `\nYour previous response was invalid. You MUST choose from these columns: ${availableColumns.join(', ')}.\n` : ''}
+
+Analyze the board carefully:
+1. Look for any immediate winning moves
+2. Block opponent's potential winning moves
+3. Create opportunities for future winning moves
+4. Control the center of the board when possible
+5. Avoid moves that give your opponent a winning opportunity
+
+Choose the best strategic move from the available columns.
+Respond with ONLY the column number.`
+
+    console.log('\n=== Connect Four Move Request ===')
+    console.log('Model:', model)
+    console.log('Player:', currentPlayer)
+    console.log('Available columns:', availableColumns)
+    console.log('Board state:', visualBoard)
 
     if (model === 'Claude 3.5 Sonnet') {
-      const response = await anthropic.messages.create({
-        model: 'claude-3-5-sonnet-20241022',
-        max_tokens: 5,
-        temperature: 0.7,
-        system: SYSTEM_PROMPT,
-        messages: [
-          {
-            role: 'user',
-            content: movePrompt
-          }
-        ]
-      })
+      let retryCount = 0
+      let column
+      while (retryCount < MAX_RETRIES) {
+        const response = await anthropic.messages.create({
+          model: 'claude-3-5-sonnet-20241022',
+          max_tokens: 5,
+          temperature: 0.9,
+          system: SYSTEM_PROMPT,
+          messages: [
+            {
+              role: 'user',
+              content: getPrompt(retryCount)
+            }
+          ]
+        })
 
-      // Extract just the number from Claude's response
-      const responseText = response.content[0].text.trim()
-      const columnMatch = responseText.match(/\d+/)
-      if (!columnMatch) {
-        throw new Error('Invalid column response from Claude')
+        const responseText = response.content[0].text.trim()
+        console.log(`Claude raw response (attempt ${retryCount + 1}):`, responseText)
+
+        column = parseInt(responseText)
+        if (!isNaN(column) && availableColumns.includes(column)) {
+          console.log('Claude chose valid column:', column)
+          return NextResponse.json({ column })
+        }
+
+        console.log(`Claude chose invalid column (attempt ${retryCount + 1}):`, responseText)
+        retryCount++
       }
 
-      const column = parseInt(columnMatch[0])
-      if (isNaN(column) || column < 0 || column > 6 || !availableColumns.includes(column)) {
-        throw new Error('Invalid column response from Claude')
-      }
-
-      return NextResponse.json({ column })
+      // If all retries failed, use fallback
+      console.log('Claude failed after', MAX_RETRIES, 'attempts, using fallback')
+      const fallbackColumn = chooseFallbackColumn(availableColumns)
+      console.log('Using fallback column:', fallbackColumn)
+      return NextResponse.json({ column: fallbackColumn })
     } else if (model === 'OpenAI GPT-4o') {
-      const response = await openai.chat.completions.create({
-        model: 'gpt-4o',
-        messages: [
-          { role: 'system', content: SYSTEM_PROMPT },
-          {
-            role: 'user',
-            content: movePrompt
-          }
-        ],
-        temperature: 0.7,
-        max_tokens: 5
-      })
+      let retryCount = 0
+      let column
+      while (retryCount < MAX_RETRIES) {
+        const response = await openai.chat.completions.create({
+          model: 'gpt-4o',
+          messages: [
+            { role: 'system', content: SYSTEM_PROMPT },
+            { role: 'user', content: getPrompt(retryCount) }
+          ],
+          temperature: 0.9,
+          max_tokens: 5
+        })
 
-      const column = parseInt(response.choices[0].message.content.trim())
-      if (isNaN(column) || column < 0 || column > 6 || !availableColumns.includes(column)) {
-        throw new Error('Invalid column response from GPT-4o')
+        const responseText = response.choices[0].message.content.trim()
+        console.log(`GPT-4 raw response (attempt ${retryCount + 1}):`, responseText)
+
+        column = parseInt(responseText)
+        if (!isNaN(column) && availableColumns.includes(column)) {
+          console.log('GPT-4 chose valid column:', column)
+          return NextResponse.json({ column })
+        }
+
+        console.log(`GPT-4 chose invalid column (attempt ${retryCount + 1}):`, responseText)
+        retryCount++
       }
 
-      return NextResponse.json({ column })
+      // If all retries failed, use fallback
+      console.log('GPT-4 failed after', MAX_RETRIES, 'attempts, using fallback')
+      const fallbackColumn = chooseFallbackColumn(availableColumns)
+      console.log('Using fallback column:', fallbackColumn)
+      return NextResponse.json({ column: fallbackColumn })
     }
 
     throw new Error('Unsupported model')
   } catch (error) {
-    console.error('Error in make-move:', error)
-    return NextResponse.json(
-      { error: error.message || 'Failed to make move' },
-      { status: 500 }
-    )
+    console.error('Error in make-move:', error.message)
+    try {
+      // Use fallback mechanism for any errors
+      const fallbackColumn = chooseFallbackColumn(availableColumns)
+      console.log('Using fallback column due to error:', fallbackColumn)
+      return NextResponse.json({ column: fallbackColumn })
+    } catch {
+      // If all else fails, return a 500 error
+      return NextResponse.json(
+        { error: 'Failed to make move' },
+        { status: 500 }
+      )
+    }
   }
+}
+
+// Helper function to choose a strategic fallback column
+function chooseFallbackColumn (columns) {
+  // Prefer center columns when available
+  const centerPreference = [3, 2, 4, 1, 5, 0, 6]
+  for (const preferred of centerPreference) {
+    if (columns.includes(preferred)) {
+      return preferred
+    }
+  }
+  // If no preferred columns are available, return the first available column
+  return columns[0]
 }

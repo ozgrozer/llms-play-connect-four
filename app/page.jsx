@@ -183,24 +183,31 @@ export default function ConnectFour () {
         throw new Error(data.error || 'Failed to get AI move')
       }
 
-      handleColumnClick(data.column, true)
-      setIsAIThinking(false)
+      await handleColumnClick(data.column, true)
     } catch (error) {
       console.log('Error getting AI move:', error)
-      setIsAIThinking(false)
       // Optionally show error to user here
     }
+    setIsAIThinking(false)
   }
 
   useEffect(() => {
+    let timeoutId
     const aiPlayer = getCurrentAIPlayer()
-    if (aiPlayer && !winner && !isAIThinking) {
-      setTimeout(() => makeAIMove(), 500)
-    }
-  }, [currentPlayer, winner, board, isAIThinking])
 
-  const handleColumnClick = (colIndex, isAIMove = false) => {
-    if (winner || isAIThinking) return
+    if (aiPlayer && !winner && !isAIThinking) {
+      timeoutId = setTimeout(() => makeAIMove(), 1000)
+    }
+
+    return () => {
+      if (timeoutId) {
+        clearTimeout(timeoutId)
+      }
+    }
+  }, [currentPlayer, winner])
+
+  const handleColumnClick = async (colIndex, isAIMove = false) => {
+    if (winner || (isAIThinking && !isAIMove)) return
 
     const currentAIPlayer = getCurrentAIPlayer()
     if (currentAIPlayer && !isAIMove) return // Only prevent human moves during AI turns
@@ -208,30 +215,38 @@ export default function ConnectFour () {
     // Check if column is full
     if (board[0][colIndex] !== null) {
       console.log('Column is full, cannot make move')
-      setIsAIThinking(false)
       return
     }
 
-    const newBoard = [...board]
+    // Create a new board state
+    const newBoard = board.map(row => [...row])
+
+    // Find the lowest empty position in the column
+    let rowIndex = -1
     for (let row = 5; row >= 0; row--) {
       if (!newBoard[row][colIndex]) {
-        newBoard[row][colIndex] = currentPlayer
-        setBoard(newBoard)
-        setLastMove({ row, col: colIndex })
-
-        const winResult = checkWin(newBoard, row, colIndex, currentPlayer)
-        if (winResult.hasWon) {
-          setWinner(currentPlayer)
-          setWinningPositions(winResult.positions)
-          setIsAIThinking(false) // Ensure AI thinking is reset on win
-          return
-        }
-
-        // Only switch players if no winner
-        setCurrentPlayer(currentPlayer === 'red' ? 'yellow' : 'red')
+        rowIndex = row
         break
       }
     }
+
+    if (rowIndex === -1) return // Column is full
+
+    // Update the board
+    newBoard[rowIndex][colIndex] = currentPlayer
+    setBoard(newBoard)
+    setLastMove({ row: rowIndex, col: colIndex })
+
+    // Check for winner
+    const winResult = checkWin(newBoard, rowIndex, colIndex, currentPlayer)
+    if (winResult.hasWon) {
+      setWinner(currentPlayer)
+      setWinningPositions(winResult.positions)
+      return
+    }
+
+    // Switch players
+    setCurrentPlayer(currentPlayer === 'red' ? 'yellow' : 'red')
   }
 
   return (
