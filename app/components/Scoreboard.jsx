@@ -8,7 +8,7 @@ const Scoreboard = ({
   totalGames
 }) => {
   return (
-    <div className='bg-white p-2 rounded-xl shadow-lg mb-3 w-[200px]'>
+    <div className='bg-white p-2 rounded-xl shadow-lg mb-4 w-[200px]'>
       <div className='flex flex-col gap-0.5'>
         <h2 className='text-sm font-black text-center tracking-wider'>
           GAME {Math.min(gamesPlayed + 1, totalGames)} OF {totalGames}

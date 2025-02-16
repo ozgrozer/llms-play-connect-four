@@ -39,7 +39,7 @@ export default function ConnectFour () {
     <div
       className={`flex flex-col items-center justify-center min-h-screen bg-gray-100 p-4 ${bungee.className}`}
     >
-      <h1 className='text-3xl font-bold mb-3 text-gray-800 tracking-wide'>
+      <h1 className='text-3xl font-bold mb-4 text-gray-800 tracking-wide'>
         <span className='text-gray-700'>Connect</span>{' '}
         <span className='text-blue-600'>Four</span>
       </h1>
@@ -53,7 +53,7 @@ export default function ConnectFour () {
       />
 
       {isSeriesComplete ? (
-        <div className='mb-6 text-2xl font-bold animate-bounce'>
+        <div className='mb-4 text-2xl font-bold animate-bounce'>
           <span
             className={`${
               scores.red > scores.yellow ? 'text-red-600' : 'text-yellow-500'
@@ -67,7 +67,7 @@ export default function ConnectFour () {
           </span>
         </div>
       ) : winner && countdown === null ? (
-        <div className='mb-6 text-2xl font-bold animate-bounce'>
+        <div className='mb-4 text-2xl font-bold animate-bounce'>
           <span
             className={`${
               winner === 'red' ? 'text-red-600' : 'text-yellow-500'
@@ -81,11 +81,11 @@ export default function ConnectFour () {
           </span>
         </div>
       ) : countdown !== null ? (
-        <div className='mb-6 text-2xl font-semibold text-gray-700'>
+        <div className='mb-4 text-2xl font-semibold text-gray-700'>
           A new game is starting in {countdown} seconds...
         </div>
       ) : (
-        <div className='mb-6 text-2xl font-semibold text-gray-700 flex items-center gap-3'>
+        <div className='mb-4 text-2xl font-semibold text-gray-700 flex items-center gap-3'>
           Current Player:{' '}
           <span
             className={`${
