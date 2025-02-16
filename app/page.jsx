@@ -37,9 +37,9 @@ export default function ConnectFour () {
 
   return (
     <div
-      className={`flex flex-col items-center justify-center min-h-screen bg-gray-100 p-8 ${bungee.className}`}
+      className={`flex flex-col items-center justify-center min-h-screen bg-gray-100 p-4 ${bungee.className}`}
     >
-      <h1 className='text-5xl font-bold mb-8 text-gray-800 tracking-wide'>
+      <h1 className='text-3xl font-bold mb-3 text-gray-800 tracking-wide'>
         <span className='text-gray-700'>Connect</span>{' '}
         <span className='text-blue-600'>Four</span>
       </h1>
