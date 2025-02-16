@@ -15,6 +15,11 @@ const groq = new OpenAI({
   baseURL: 'https://api.groq.com/openai/v1'
 })
 
+const grok = new OpenAI({
+  apiKey: process.env.XAI_API_KEY,
+  baseURL: 'https://api.x.ai/v1'
+})
+
 const SYSTEM_PROMPT = `You are playing Connect Four, aiming to win by connecting 4 pieces horizontally, vertically, or diagonally.
 The board is 6 rows (0-5, bottom to top) and 7 columns (0-6, left to right).
 Empty spaces are null, your pieces are marked as your color ('red' or 'yellow').
@@ -454,6 +459,44 @@ Respond with ONLY the column number.`
 
       // If all retries failed, use fallback
       console.log('Llama failed after', MAX_RETRIES, 'attempts, using fallback')
+      const fallbackColumn = chooseFallbackColumn(availableColumns)
+      console.log('Using fallback column:', fallbackColumn)
+      return NextResponse.json({ column: fallbackColumn })
+    } else if (model === 'X.AI Grok 2') {
+      let retryCount = 0
+      let column
+      while (retryCount < MAX_RETRIES) {
+        const response = await grok.chat.completions.create({
+          model: 'grok-2-latest',
+          messages: [
+            { role: 'system', content: SYSTEM_PROMPT },
+            { role: 'user', content: getPrompt(retryCount) }
+          ],
+          temperature: 1.0,
+          max_tokens: 5
+        })
+
+        const responseText = response.choices[0].message.content.trim()
+        console.log(
+          `Grok raw response (attempt ${retryCount + 1}):`,
+          responseText
+        )
+
+        column = parseInt(responseText)
+        if (!isNaN(column) && availableColumns.includes(column)) {
+          console.log('Grok chose valid column:', column)
+          return NextResponse.json({ column })
+        }
+
+        console.log(
+          `Grok chose invalid column (attempt ${retryCount + 1}):`,
+          responseText
+        )
+        retryCount++
+      }
+
+      // If all retries failed, use fallback
+      console.log('Grok failed after', MAX_RETRIES, 'attempts, using fallback')
       const fallbackColumn = chooseFallbackColumn(availableColumns)
       console.log('Using fallback column:', fallbackColumn)
       return NextResponse.json({ column: fallbackColumn })

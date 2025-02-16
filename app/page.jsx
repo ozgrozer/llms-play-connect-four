@@ -24,6 +24,7 @@ const AI_PLAYERS = {
   CLAUDE: 'Claude 3.5 Sonnet',
   GPT4: 'OpenAI GPT-4o',
   LLAMA: 'Llama 3.3 70b',
+  GROK: 'X.AI Grok 2',
   HUMAN: 'Human'
 }
 
@@ -275,6 +276,8 @@ export default function ConnectFour () {
                 ? 'Claude'
                 : redPlayer === AI_PLAYERS.LLAMA
                 ? 'Llama'
+                : redPlayer === AI_PLAYERS.GROK
+                ? 'X.AI'
                 : 'OpenAI'
               : yellowPlayer === AI_PLAYERS.HUMAN
               ? 'Human'
@@ -282,6 +285,8 @@ export default function ConnectFour () {
               ? 'Claude'
               : yellowPlayer === AI_PLAYERS.LLAMA
               ? 'Llama'
+              : yellowPlayer === AI_PLAYERS.GROK
+              ? 'X.AI'
               : 'OpenAI'}{' '}
             wins!
           </span>
@@ -301,6 +306,8 @@ export default function ConnectFour () {
                 ? 'Claude'
                 : redPlayer === AI_PLAYERS.LLAMA
                 ? 'Llama'
+                : redPlayer === AI_PLAYERS.GROK
+                ? 'X.AI'
                 : 'OpenAI'
               : yellowPlayer === AI_PLAYERS.HUMAN
               ? 'Human'
@@ -308,6 +315,8 @@ export default function ConnectFour () {
               ? 'Claude'
               : yellowPlayer === AI_PLAYERS.LLAMA
               ? 'Llama'
+              : yellowPlayer === AI_PLAYERS.GROK
+              ? 'X.AI'
               : 'OpenAI'}
           </span>
           {isAIThinking && (
@@ -372,6 +381,7 @@ export default function ConnectFour () {
               </SelectItem>
               <SelectItem value={AI_PLAYERS.GPT4}>OpenAI GPT-4o</SelectItem>
               <SelectItem value={AI_PLAYERS.LLAMA}>Llama 3.3 70b</SelectItem>
+              <SelectItem value={AI_PLAYERS.GROK}>X.AI Grok 2</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -391,6 +401,7 @@ export default function ConnectFour () {
               </SelectItem>
               <SelectItem value={AI_PLAYERS.GPT4}>OpenAI GPT-4o</SelectItem>
               <SelectItem value={AI_PLAYERS.LLAMA}>Llama 3.3 70b</SelectItem>
+              <SelectItem value={AI_PLAYERS.GROK}>X.AI Grok 2</SelectItem>
             </SelectContent>
           </Select>
         </div>
