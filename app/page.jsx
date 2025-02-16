@@ -23,6 +23,7 @@ const bungee = Bungee({
 const AI_PLAYERS = {
   CLAUDE: 'Claude 3.5 Sonnet',
   GPT4: 'OpenAI GPT-4o',
+  LLAMA: 'Llama 3.3 70b',
   HUMAN: 'Human'
 }
 
@@ -362,6 +363,7 @@ export default function ConnectFour () {
                 Claude 3.5 Sonnet
               </SelectItem>
               <SelectItem value={AI_PLAYERS.GPT4}>OpenAI GPT-4o</SelectItem>
+              <SelectItem value={AI_PLAYERS.LLAMA}>Llama 3.3 70b</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -380,6 +382,7 @@ export default function ConnectFour () {
                 Claude 3.5 Sonnet
               </SelectItem>
               <SelectItem value={AI_PLAYERS.GPT4}>OpenAI GPT-4o</SelectItem>
+              <SelectItem value={AI_PLAYERS.LLAMA}>Llama 3.3 70b</SelectItem>
             </SelectContent>
           </Select>
         </div>

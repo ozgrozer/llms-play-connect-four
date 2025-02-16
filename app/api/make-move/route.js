@@ -10,6 +10,11 @@ const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY
 })
 
+const groq = new OpenAI({
+  apiKey: process.env.GROQ_API_KEY,
+  baseURL: 'https://api.groq.com/openai/v1'
+})
+
 const SYSTEM_PROMPT = `You are playing Connect Four, aiming to win by connecting 4 pieces horizontally, vertically, or diagonally.
 The board is 6 rows (0-5, bottom to top) and 7 columns (0-6, left to right).
 Empty spaces are null, your pieces are marked as your color ('red' or 'yellow').
@@ -408,6 +413,47 @@ Respond with ONLY the column number.`
 
       // If all retries failed, use fallback
       console.log('GPT-4 failed after', MAX_RETRIES, 'attempts, using fallback')
+      const fallbackColumn = chooseFallbackColumn(availableColumns)
+      console.log('Using fallback column:', fallbackColumn)
+      return NextResponse.json({ column: fallbackColumn })
+    } else if (model === 'Llama 3.3 70b') {
+      let retryCount = 0
+      let column
+      while (retryCount < MAX_RETRIES) {
+        const response = await groq.chat.completions.create({
+          model: 'llama-3.3-70b-versatile',
+          messages: [
+            { role: 'system', content: SYSTEM_PROMPT },
+            { role: 'user', content: getPrompt(retryCount) }
+          ],
+          temperature: 1.1,
+          max_tokens: 5,
+          top_p: 0.9,
+          frequency_penalty: 0.3,
+          presence_penalty: 0.3
+        })
+
+        const responseText = response.choices[0].message.content.trim()
+        console.log(
+          `Llama raw response (attempt ${retryCount + 1}):`,
+          responseText
+        )
+
+        column = parseInt(responseText)
+        if (!isNaN(column) && availableColumns.includes(column)) {
+          console.log('Llama chose valid column:', column)
+          return NextResponse.json({ column })
+        }
+
+        console.log(
+          `Llama chose invalid column (attempt ${retryCount + 1}):`,
+          responseText
+        )
+        retryCount++
+      }
+
+      // If all retries failed, use fallback
+      console.log('Llama failed after', MAX_RETRIES, 'attempts, using fallback')
       const fallbackColumn = chooseFallbackColumn(availableColumns)
       console.log('Using fallback column:', fallbackColumn)
       return NextResponse.json({ column: fallbackColumn })
